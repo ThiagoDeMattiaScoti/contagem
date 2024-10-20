@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contagem Regressiva</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .timer {
+            font-size: 48px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="timer" class="timer"></div>
+    </div>
+    <script>
+        function getNextWednesday() {
+            const now = new Date();
+            const daysUntilWednesday = (3 - now.getDay() + 7) % 7 || 7; // Se já for quarta, conta para a próxima
+            const nextWednesday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysUntilWednesday, 0, 0, 0);
+            return nextWednesday;
+        }
+
+        function saveEndTime(endTime) {
+            localStorage.setItem('endTime', endTime);
+        }
+
+        function getSavedEndTime() {
+            return localStorage.getItem('endTime');
+        }
+
+        function initializeTimer() {
+            const savedEndTime = getSavedEndTime();
+            const now = new Date();
+            let endTime;
+
+            if (savedEndTime) {
+                endTime = new Date(savedEndTime);
+                if (endTime <= now) {
+                    endTime = getNextWednesday();
+                    saveEndTime(endTime);
+                }
+            } else {
+                endTime = getNextWednesday();
+                saveEndTime(endTime);
+            }
+
+            return endTime;
+        }
+
+        function updateTimer() {
+            const endTime = initializeTimer();
+            const now = new Date();
+            const remainingTime = endTime - now;
+
+            if (remainingTime <= 0) {
+                document.getElementById('timer').innerHTML = "A contagem regressiva acabou!";
+                clearInterval(timerInterval);
+                localStorage.removeItem('endTime'); // Limpa o tempo salvo quando acaba
+                return;
+            }
+
+            const days = Math.floor(remainingTime / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((remainingTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+
+            document.getElementById('timer').innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+
+        const timerInterval = setInterval(updateTimer, 1000);
+        updateTimer(); // Chama a função uma vez imediatamente para evitar atraso
+    </script>
+</body>
+</html>
